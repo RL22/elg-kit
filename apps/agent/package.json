@@ -9,6 +9,7 @@
     "build": "tsc",
     "start": "node dist/agent/agent.js",
     "typecheck": "tsc --noEmit",
+    "test": "tsx --test test/*.test.ts",
     "lint": "prettier --check \"**/*.ts\""
   },
   "dependencies": {

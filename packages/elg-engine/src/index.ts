@@ -10,3 +10,4 @@ export * from './anti-cringe.js';
 export * from './formatter.js';
 export * from './prompts.js';
 export * from './engine.js';
+export * from './router.js';

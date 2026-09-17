@@ -2,9 +2,9 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import dotenv from 'dotenv';
-import { generateText } from 'ai';
 import { createOpenAI } from '@ai-sdk/openai';
 import { createAnthropic } from '@ai-sdk/anthropic';
+import { executeSemanticTask } from '../../../packages/elg-engine/dist/index.js';
 import { SignalParser, MilestoneSignal } from './tools/signal-parser.js';
 import { VoiceProfiler } from './tools/voice-profiler.js';
 import { SlackChannelRouter } from './channels/slack.js';
@@ -278,7 +278,6 @@ export class ElgAgent {
     }
 
     const results: PerspectiveOutput[] = [];
-    const isReasoningModel = /o1|o3|r1|deepseek-reasoner|thinking/i.test(this.modelId);
 
     for (const role of roles) {
       const prompt = `
@@ -302,19 +301,15 @@ STRICT CONSTRAINTS (Violations will break the build):
 `;
 
       try {
-        const callOptions: Parameters<typeof generateText>[0] = {
-          model: this.getLanguageModel(),
+        const { text } = await executeSemanticTask('workhorse', prompt, {
           system: this.instructions,
-          prompt,
+          temperature: this.temperature,
+          apiKey: this.apiKey,
+          baseUrl: this.baseUrl,
+          provider: this.provider as any,
+          modelId: this.modelId,
           maxTokens: 3500,
-        };
-
-        // Reasoning models reject custom temperature
-        if (!isReasoningModel) {
-          callOptions.temperature = this.temperature ?? 0.65;
-        }
-
-        const { text } = await generateText(callOptions);
+        });
 
         const processed = this.postProcessDraft(text, memberSlug, signal.url);
         results.push({

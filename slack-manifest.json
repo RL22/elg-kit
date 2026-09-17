@@ -42,6 +42,13 @@
         "description": "Manage ELG voice samples, weekly impact stats, and snooze preferences",
         "usage_hint": "sample | stats | snooze | opt-out",
         "should_escape": false
+      },
+      {
+        "command": "/harvest",
+        "url": "https://${APP_DOMAIN}/api/slack/events",
+        "description": "Harvest high-signal quotes from a thread into a ready-to-share post draft",
+        "usage_hint": "[thread_ts]",
+        "should_escape": false
       }
     ]
   },

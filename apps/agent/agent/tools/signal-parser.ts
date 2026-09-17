@@ -57,7 +57,7 @@ export function verifyHmacSha256(
   try {
     const computedHmac = crypto
       .createHmac('sha256', secret)
-      .update(rawBody)
+      .update(rawBody as any)
       .digest('hex');
 
     const expectedBuffer = Buffer.from(computedHmac, 'hex');
@@ -67,7 +67,7 @@ export function verifyHmacSha256(
       return false;
     }
 
-    return crypto.timingSafeEqual(expectedBuffer, actualBuffer);
+    return crypto.timingSafeEqual(expectedBuffer as any, actualBuffer as any);
   } catch (err) {
     console.error('[signal-parser] Signature verification exception:', err);
     return false;

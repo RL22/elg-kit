@@ -113,10 +113,10 @@ export class AnalyticsEngineClient {
  * Cron expression: 0 16 * * 5 (Every Friday at 16:00 / 4:00 PM)
  */
 export class WeeklyImpactScheduler {
-  private slack: WebClient;
+  private slack: any;
   private analytics: AnalyticsEngineClient;
 
-  constructor(slackClient?: WebClient) {
+  constructor(slackClient?: any) {
     this.slack = slackClient || new WebClient(process.env.SLACK_BOT_TOKEN);
     this.analytics = new AnalyticsEngineClient();
   }

@@ -4,10 +4,16 @@
   "description": "Quintuple-perspective prompt generator and anti-cringe filter for Employee-Led Growth (elg-kit)",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
   "type": "module",
   "scripts": {
     "build": "tsc",
-    "test": "tsx --test test/engine.test.ts"
+    "test": "tsx --test test/engine.test.ts test/router.test.ts"
   },
   "keywords": [
     "elg",
