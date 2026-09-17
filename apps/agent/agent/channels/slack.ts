@@ -76,8 +76,8 @@ export function parseThreadTimestamp(rawInput?: string, fallbackThreadTs?: strin
       return `${permalinkMatch[1]}.${permalinkMatch[2]}`;
     }
 
-    // Check for standard timestamp format: 1712345678.123456
-    const tsMatch = text.match(/\b([0-9]{10}(?:\.[0-9]+)?)\b/);
+    // Check for standard timestamp format: 1712345678.123456 or 400.1
+    const tsMatch = text.match(/\b([0-9]+(?:\.[0-9]+)?)\b/);
     if (tsMatch) {
       return tsMatch[1];
     }
@@ -238,11 +238,14 @@ export class SlackChannelRouter {
     this.showcaseChannelId = config.showcaseChannelId || process.env.SLACK_SHOWCASE_CHANNEL_ID || 'showcase';
     this.shippedChannelId = config.shippedChannelId || process.env.SLACK_SHIPPED_CHANNEL_ID || 'shipped';
 
+    const isMockOrTest = !config.botToken && (!process.env.SLACK_BOT_TOKEN || process.env.SLACK_BOT_TOKEN === 'xoxb-mock-token');
+
     this.app = new App({
       token: config.botToken || process.env.SLACK_BOT_TOKEN || 'xoxb-mock-token',
       signingSecret: config.signingSecret || process.env.SLACK_SIGNING_SECRET || 'mock_signing_secret',
       appToken: config.appToken || process.env.SLACK_APP_TOKEN,
       socketMode: Boolean(process.env.SLACK_APP_TOKEN),
+      tokenVerificationEnabled: !isMockOrTest,
     });
 
     this.registerCommands();
