@@ -1,0 +1,26 @@
+{
+  "name": "@elg-kit/edge-redirect",
+  "version": "0.1.0",
+  "description": "Hardened Edge Redirect Worker for elg-kit with domain allowlisting, bot filtering, and click analytics",
+  "main": "src/index.ts",
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit",
+    "deploy": "wrangler deploy"
+  },
+  "keywords": [
+    "cloudflare-workers",
+    "edge-redirect",
+    "elg",
+    "utm-attribution"
+  ],
+  "author": "Rodney Lewis & Sprintz",
+  "license": "Apache-2.0",
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20240909.0",
+    "typescript": "^5.5.4",
+    "vitest": "^2.0.5",
+    "wrangler": "^3.78.0"
+  }
+}

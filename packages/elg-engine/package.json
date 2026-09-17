@@ -1,0 +1,21 @@
+{
+  "name": "elg-engine",
+  "version": "0.1.0",
+  "description": "Quintuple-perspective prompt generator and anti-cringe filter for Employee-Led Growth (elg-kit)",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "test": "tsx --test test/engine.test.ts"
+  },
+  "keywords": [
+    "elg",
+    "employee-led-growth",
+    "perspective-engine",
+    "anti-cringe",
+    "advocacy"
+  ],
+  "author": "Rodney Lewis",
+  "license": "Apache-2.0"
+}
