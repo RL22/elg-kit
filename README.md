@@ -37,6 +37,7 @@ elg-kit/
 │       ├── package.json
 │       └── tsconfig.json
 ├── packages/
+│   ├── create-elg-kit/            # Interactive setup CLI wizard
 │   ├── edge-redirect/             # Cloudflare Worker edge redirect router
 │   └── elg-engine/                # Perspective engine library & skill
 ├── package.json                   # Monorepo root (pnpm + Turborepo)
@@ -51,10 +52,20 @@ elg-kit/
 
 ## Quickstart
 
-### 1. Configure Slack App
+### 1. Interactive Setup Wizard (Fastest)
+
+Run the interactive setup wizard to configure your `.env` and generate a customized `slack-manifest.json`:
+
+```bash
+npx create-elg-kit
+```
+
+Or manually configure via the steps below:
+
+### 2. Configure Slack App
 Import `slack-manifest.json` into your [Slack API Dashboard](https://api.slack.com/apps?new_app=1) using the "From an app manifest" option.
 
-### 2. Environment Variables & Inference Setup
+### 3. Environment Variables & Inference Setup
 Copy `.env.example` to `.env` and configure your preferred inference provider. `elg-kit` is 100% provider-agnostic:
 
 ```bash

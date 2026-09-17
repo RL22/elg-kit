@@ -1,0 +1,31 @@
+{
+  "name": "create-elg-kit",
+  "version": "0.1.0",
+  "description": "Interactive CLI setup wizard for elg-kit (Employee-Led Growth rails)",
+  "type": "module",
+  "main": "bin/index.js",
+  "bin": {
+    "create-elg-kit": "./bin/index.js"
+  },
+  "files": [
+    "bin",
+    "README.md"
+  ],
+  "scripts": {
+    "start": "node bin/index.js",
+    "test": "node --test"
+  },
+  "keywords": [
+    "create-elg-kit",
+    "elg-kit",
+    "employee-led-growth",
+    "cli",
+    "setup",
+    "wizard"
+  ],
+  "author": "Rodney Lewis and Sprintz",
+  "license": "Apache-2.0",
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}
