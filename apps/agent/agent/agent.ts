@@ -25,23 +25,33 @@ export interface PerspectiveOutput {
 
 export interface EveAgentConfig {
   instructionsPath?: string;
+  provider?: 'openrouter' | 'anthropic' | 'openai' | 'google' | 'groq' | 'deepseek' | 'ollama' | 'gateway';
+  apiKey?: string;
+  baseUrl?: string;
   aiGatewayUrl?: string;
   aiGatewayToken?: string;
   modelId?: string;
+  temperature?: number;
   webhookSecret?: string;
   edgeRedirectBaseUrl?: string;
 }
 
 /**
  * Vercel Eve Filesystem-First Agent Runtime for elg-kit.
+ * Provider-agnostic: natively supports OpenRouter, Anthropic, OpenAI,
+ * Groq, DeepSeek, Ollama, and Vercel AI Gateway.
  */
 export class ElgAgent {
   public instructions: string;
   public slackRouter: SlackChannelRouter;
   public impactScheduler: WeeklyImpactScheduler;
+  private provider: string;
+  private apiKey?: string;
+  private baseUrl?: string;
   private aiGatewayUrl: string;
   private aiGatewayToken: string;
   private modelId: string;
+  private temperature?: number;
   private webhookSecret: string;
   private edgeRedirectBaseUrl: string;
 
@@ -53,10 +63,31 @@ export class ElgAgent {
       ? fs.readFileSync(instructionsPath, 'utf-8')
       : 'Authentic engineering perspective engine. Zero corporate hype. Post body must be link-free.';
 
-    // 2. Vercel AI Gateway configuration
+    // 2. Provider and inference resolution
+    this.provider =
+      config.provider ||
+      process.env.AI_PROVIDER ||
+      (process.env.OPENROUTER_API_KEY ? 'openrouter' : 'openrouter');
+
+    this.apiKey =
+      config.apiKey ||
+      process.env.OPENROUTER_API_KEY ||
+      process.env.ANTHROPIC_API_KEY ||
+      process.env.OPENAI_API_KEY ||
+      process.env.GROQ_API_KEY ||
+      process.env.DEEPSEEK_API_KEY;
+
+    this.baseUrl = config.baseUrl || process.env.AI_BASE_URL || process.env.OPENAI_BASE_URL;
     this.aiGatewayUrl = config.aiGatewayUrl || process.env.AI_GATEWAY_URL || 'https://ai-gateway.vercel.sh/v1';
-    this.aiGatewayToken = config.aiGatewayToken || process.env.AI_GATEWAY_TOKEN || process.env.OPENAI_API_KEY || '';
-    this.modelId = config.modelId || process.env.AI_MODEL_ID || 'anthropic/claude-3-5-sonnet-20241022';
+    this.aiGatewayToken = config.aiGatewayToken || process.env.AI_GATEWAY_TOKEN || '';
+
+    // Modern 2026 flagship default: Anthropic Claude 3.7 Sonnet / Google Gemini 2.5 Pro via OpenRouter
+    this.modelId =
+      config.modelId ||
+      process.env.AI_MODEL_ID ||
+      'anthropic/claude-3.7-sonnet';
+
+    this.temperature = config.temperature ?? (process.env.AI_TEMPERATURE ? parseFloat(process.env.AI_TEMPERATURE) : undefined);
     this.webhookSecret = config.webhookSecret || process.env.WEBHOOK_SECRET || 'dev_secret_elg';
     this.edgeRedirectBaseUrl = config.edgeRedirectBaseUrl || process.env.EDGE_REDIRECT_BASE_URL || 'go.company.com';
 
@@ -68,32 +99,96 @@ export class ElgAgent {
   }
 
   /**
-   * Resolves the Language Model provider instance configured to route through Vercel AI Gateway.
+   * Resolves the Language Model provider instance dynamically.
+   * Compatible with OpenRouter, Anthropic, OpenAI, Groq, DeepSeek, Ollama, and Vercel AI Gateway.
    */
   private getLanguageModel() {
-    // Check if targeting OpenAI or Anthropic through Vercel AI Gateway
-    const isAnthropic = this.modelId.startsWith('anthropic/');
-    const cleanModelName = this.modelId.replace(/^(anthropic|openai)\//, '');
-
-    if (isAnthropic) {
-      const anthropic = createAnthropic({
-        baseURL: this.aiGatewayUrl,
-        apiKey: this.aiGatewayToken,
-        headers: {
-          'x-ai-gateway-provider': 'anthropic',
-        },
-      });
-      return anthropic(cleanModelName);
-    } else {
+    // 1. OpenRouter (Universal Flagship Aggregator)
+    if (this.provider === 'openrouter' || (this.apiKey && process.env.OPENROUTER_API_KEY)) {
       const openai = createOpenAI({
-        baseURL: this.aiGatewayUrl,
-        apiKey: this.aiGatewayToken,
+        baseURL: this.baseUrl || 'https://openrouter.ai/api/v1',
+        apiKey: this.apiKey || process.env.OPENROUTER_API_KEY || '',
         headers: {
-          'x-ai-gateway-provider': 'openai',
+          'HTTP-Referer': 'https://github.com/RL22/elg-kit',
+          'X-Title': 'elg-kit',
         },
       });
-      return openai(cleanModelName);
+      return openai(this.modelId);
     }
+
+    // 2. Groq (Ultra-Low Latency Inference)
+    if (this.provider === 'groq' || process.env.GROQ_API_KEY) {
+      const openai = createOpenAI({
+        baseURL: this.baseUrl || 'https://api.groq.com/openai/v1',
+        apiKey: this.apiKey || process.env.GROQ_API_KEY || '',
+      });
+      const cleanModel = this.modelId.replace(/^groq\//, '');
+      return openai(cleanModel);
+    }
+
+    // 3. DeepSeek Direct
+    if (this.provider === 'deepseek' || process.env.DEEPSEEK_API_KEY) {
+      const openai = createOpenAI({
+        baseURL: this.baseUrl || 'https://api.deepseek.com/v1',
+        apiKey: this.apiKey || process.env.DEEPSEEK_API_KEY || '',
+      });
+      const cleanModel = this.modelId.replace(/^deepseek\//, '');
+      return openai(cleanModel);
+    }
+
+    // 4. Ollama / Local OpenAI-compatible
+    if (this.provider === 'ollama' || process.env.OLLAMA_BASE_URL) {
+      const openai = createOpenAI({
+        baseURL: this.baseUrl || process.env.OLLAMA_BASE_URL || 'http://localhost:11434/v1',
+        apiKey: this.apiKey || 'ollama',
+      });
+      const cleanModel = this.modelId.replace(/^ollama\//, '');
+      return openai(cleanModel);
+    }
+
+    // 5. Anthropic Direct
+    if (this.provider === 'anthropic' || (process.env.ANTHROPIC_API_KEY && !process.env.OPENROUTER_API_KEY)) {
+      const cleanModel = this.modelId.replace(/^anthropic\//, '');
+      const anthropic = createAnthropic({
+        apiKey: this.apiKey || process.env.ANTHROPIC_API_KEY,
+        baseURL: this.baseUrl,
+      });
+      return anthropic(cleanModel);
+    }
+
+    // 6. Vercel AI Gateway
+    if (this.aiGatewayToken && (this.provider === 'gateway' || process.env.AI_GATEWAY_TOKEN)) {
+      const isAnthropic = this.modelId.startsWith('anthropic/');
+      const cleanModelName = this.modelId.replace(/^(anthropic|openai)\//, '');
+
+      if (isAnthropic) {
+        const anthropic = createAnthropic({
+          baseURL: this.aiGatewayUrl,
+          apiKey: this.aiGatewayToken,
+          headers: {
+            'x-ai-gateway-provider': 'anthropic',
+          },
+        });
+        return anthropic(cleanModelName);
+      } else {
+        const openai = createOpenAI({
+          baseURL: this.aiGatewayUrl,
+          apiKey: this.aiGatewayToken,
+          headers: {
+            'x-ai-gateway-provider': 'openai',
+          },
+        });
+        return openai(cleanModelName);
+      }
+    }
+
+    // 7. OpenAI Direct Default
+    const cleanModelName = this.modelId.replace(/^openai\//, '');
+    const openai = createOpenAI({
+      apiKey: this.apiKey || process.env.OPENAI_API_KEY || '',
+      baseURL: this.baseUrl,
+    });
+    return openai(cleanModelName);
   }
 
   /**
@@ -106,6 +201,10 @@ export class ElgAgent {
     targetUrl: string
   ): { postBody: string; firstComment: string; wordCount: number } {
     let cleaned = rawText;
+
+    // 0. Strip reasoning and thinking traces (<think>...</think>, [thinking]...[/thinking])
+    cleaned = cleaned.replace(/<think>[\s\S]*?<\/think>/gi, '').trim();
+    cleaned = cleaned.replace(/\[thinking\][\s\S]*?\[\/thinking\]/gi, '').trim();
 
     // 1. Strip Forbidden Emojis (🚀, 🔥, 🎉, 💪, 📈, ✨)
     cleaned = cleaned.replace(/[🚀🔥🎉💪📈✨]/gu, '');
@@ -179,6 +278,7 @@ export class ElgAgent {
     }
 
     const results: PerspectiveOutput[] = [];
+    const isReasoningModel = /o1|o3|r1|deepseek-reasoner|thinking/i.test(this.modelId);
 
     for (const role of roles) {
       const prompt = `
@@ -202,12 +302,19 @@ STRICT CONSTRAINTS (Violations will break the build):
 `;
 
       try {
-        const { text } = await generateText({
+        const callOptions: Parameters<typeof generateText>[0] = {
           model: this.getLanguageModel(),
           system: this.instructions,
           prompt,
-          temperature: 0.65,
-        });
+          maxTokens: 3500,
+        };
+
+        // Reasoning models reject custom temperature
+        if (!isReasoningModel) {
+          callOptions.temperature = this.temperature ?? 0.65;
+        }
+
+        const { text } = await generateText(callOptions);
 
         const processed = this.postProcessDraft(text, memberSlug, signal.url);
         results.push({

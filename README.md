@@ -54,12 +54,27 @@ elg-kit/
 ### 1. Configure Slack App
 Import `slack-manifest.json` into your [Slack API Dashboard](https://api.slack.com/apps?new_app=1) using the "From an app manifest" option.
 
-### 2. Environment Variables
-Copy `.env.example` in `apps/agent` and supply:
+### 2. Environment Variables & Inference Setup
+Copy `.env.example` to `.env` and configure your preferred inference provider. `elg-kit` is 100% provider-agnostic:
+
+```bash
+# Recommended: OpenRouter Universal Gateway
+AI_PROVIDER=openrouter
+OPENROUTER_API_KEY=sk-or-v1-...
+AI_MODEL_ID=anthropic/claude-3.7-sonnet # or google/gemini-2.5-pro, deepseek/deepseek-chat, openai/gpt-5.6-sol
+
+# Or Direct Providers:
+# AI_PROVIDER=anthropic  # ANTHROPIC_API_KEY=sk-ant-...  AI_MODEL_ID=claude-3-7-sonnet-latest
+# AI_PROVIDER=openai     # OPENAI_API_KEY=sk-proj-...    AI_MODEL_ID=gpt-5.6-sol
+# AI_PROVIDER=groq       # GROQ_API_KEY=gsk_...          AI_MODEL_ID=llama-3.3-70b-versatile
+# AI_PROVIDER=deepseek   # DEEPSEEK_API_KEY=sk-...       AI_MODEL_ID=deepseek-chat
+# AI_PROVIDER=ollama     # OLLAMA_BASE_URL=http://localhost:11434/v1  AI_MODEL_ID=qwen2.5:32b
+```
+
+Also supply:
 - `SLACK_BOT_TOKEN`, `SLACK_SIGNING_SECRET`, `SLACK_APP_TOKEN`
-- `AI_GATEWAY_URL`, `AI_GATEWAY_TOKEN`
 - `EDGE_REDIRECT_BASE_URL` (e.g., `go.company.com`)
-- `WEBHOOK_SECRET`
+- `WEBHOOK_SECRET` (HMAC SHA-256 secret for ingestion webhooks)
 
 ### 3. Development
 ```bash
