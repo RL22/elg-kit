@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ExecutiveMilestoneBrief",
+  "description": "Output schema for executive, board, and investor milestone digest memos",
+  "type": "object",
+  "required": ["period", "shippedCount", "topWins", "kpiMetrics", "memoBody", "firstComment", "wordCount"],
+  "properties": {
+    "period": { "type": "string" },
+    "shippedCount": { "type": "integer", "minimum": 1 },
+    "topWins": {
+      "type": "array",
+      "items": { "type": "string" },
+      "minItems": 1,
+      "maxItems": 4
+    },
+    "kpiMetrics": {
+      "type": "object",
+      "required": ["latencyDelta", "infrastructureCostDelta", "uptime"],
+      "properties": {
+        "latencyDelta": { "type": "string" },
+        "infrastructureCostDelta": { "type": "string" },
+        "uptime": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "memoBody": {
+      "type": "string",
+      "description": "Clean executive summary bounded strictly to 150-200 words, zero links"
+    },
+    "firstComment": {
+      "type": "string",
+      "description": "Attributed link to full quarterly engineering and product roadmap"
+    },
+    "wordCount": {
+      "type": "integer",
+      "minimum": 150,
+      "maximum": 200
+    }
+  },
+  "additionalProperties": false
+}

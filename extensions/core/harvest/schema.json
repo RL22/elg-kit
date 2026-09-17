@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "HarvestQuoteResult",
+  "description": "Output schema for thread quote harvesting via /harvest or reaction listeners",
+  "type": "object",
+  "required": ["success", "draft"],
+  "properties": {
+    "success": { "type": "boolean" },
+    "reason": { "type": "string" },
+    "draft": {
+      "type": "object",
+      "required": ["originalQuote", "authorId", "memberSlug", "discussionUrl", "postBody", "firstComment", "wordCount"],
+      "properties": {
+        "originalQuote": { "type": "string" },
+        "authorId": { "type": "string" },
+        "memberSlug": { "type": "string" },
+        "discussionUrl": { "type": "string", "format": "uri" },
+        "postBody": {
+          "type": "string",
+          "description": "Strictly link-free post body, bounded to 150-200 words"
+        },
+        "firstComment": {
+          "type": "string",
+          "description": "Comment containing the personal attributed edge shortlink"
+        },
+        "wordCount": {
+          "type": "integer",
+          "minimum": 150,
+          "maximum": 200
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

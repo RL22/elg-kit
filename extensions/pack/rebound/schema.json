@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ReboundProductionRetrospective",
+  "description": "Output schema for 90/180-day production retrospective analysis and post drafting",
+  "type": "object",
+  "required": ["releaseName", "daysInProduction", "originalThesis", "productionReality", "postBody", "firstComment", "wordCount"],
+  "properties": {
+    "releaseName": { "type": "string" },
+    "daysInProduction": { "type": "integer", "enum": [90, 180, 365] },
+    "originalThesis": { "type": "string" },
+    "productionReality": {
+      "type": "object",
+      "required": ["metricsDelta", "unexpectedEdgeCases", "architecturalTakeaway"],
+      "properties": {
+        "metricsDelta": { "type": "string" },
+        "unexpectedEdgeCases": { "type": "string" },
+        "architecturalTakeaway": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "postBody": {
+      "type": "string",
+      "description": "Retrospective narrative strictly bounded to 150-200 words, zero links"
+    },
+    "firstComment": {
+      "type": "string",
+      "description": "Attributed link to post-mortem, metrics dashboard, or architecture RFC"
+    },
+    "wordCount": {
+      "type": "integer",
+      "minimum": 150,
+      "maximum": 200
+    }
+  },
+  "additionalProperties": false
+}

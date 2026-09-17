@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "TelemetryEventSchema",
+  "description": "Schema for click and conversion telemetry events tracked at the edge",
+  "type": "object",
+  "required": ["eventType", "timestamp", "memberSlug", "destinationUrl", "isBot", "clickId"],
+  "properties": {
+    "eventType": { "type": "string", "enum": ["click", "read", "conversion"] },
+    "timestamp": { "type": "string", "format": "date-time" },
+    "clickId": { "type": "string" },
+    "memberSlug": { "type": "string" },
+    "referrer": { "type": "string" },
+    "destinationUrl": { "type": "string", "format": "uri" },
+    "isBot": { "type": "boolean" },
+    "country": { "type": "string" },
+    "pipelineValue": { "type": "number", "minimum": 0 }
+  },
+  "additionalProperties": false
+}

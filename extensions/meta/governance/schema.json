@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "GovernanceAuditResult",
+  "description": "Output schema for domain allowlist auditing and corporate URL governance",
+  "type": "object",
+  "required": ["valid", "destinationUrl", "hostname", "allowedDomains", "matchedRule"],
+  "properties": {
+    "valid": { "type": "boolean" },
+    "destinationUrl": { "type": "string", "format": "uri" },
+    "hostname": { "type": "string" },
+    "allowedDomains": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "matchedRule": { "type": ["string", "null"] },
+    "rejectionReason": { "type": "string" }
+  },
+  "additionalProperties": false
+}

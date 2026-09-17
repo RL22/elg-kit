@@ -49,6 +49,62 @@
         "description": "Harvest high-signal quotes from a thread into a ready-to-share post draft",
         "usage_hint": "[thread_ts]",
         "should_escape": false
+      },
+      {
+        "command": "/guard",
+        "url": "https://${APP_DOMAIN}/api/slack/events",
+        "description": "Pre-publish DLP token and secret scanner",
+        "usage_hint": "[text to inspect]",
+        "should_escape": false
+      },
+      {
+        "command": "/suggest",
+        "url": "https://${APP_DOMAIN}/api/slack/events",
+        "description": "Mine recent conversations for high-signal technical post drafts",
+        "usage_hint": "",
+        "should_escape": false
+      },
+      {
+        "command": "/impact",
+        "url": "https://${APP_DOMAIN}/api/slack/events",
+        "description": "Private report of verified reads, bot-filtered clicks, and attributed pipeline",
+        "usage_hint": "[7 | 30 | 90]",
+        "should_escape": false
+      },
+      {
+        "command": "/repost",
+        "url": "https://${APP_DOMAIN}/api/slack/events",
+        "description": "Adapt technical post to GTM, Talent, or Product perspective",
+        "usage_hint": "[quote_or_url] --role [gtm|talent|product]",
+        "should_escape": false
+      },
+      {
+        "command": "/rebound",
+        "url": "https://${APP_DOMAIN}/api/slack/events",
+        "description": "Generate a 90/180-day production retrospective post draft",
+        "usage_hint": "[release-name] --days [90|180]",
+        "should_escape": false
+      },
+      {
+        "command": "/kudos",
+        "url": "https://${APP_DOMAIN}/api/slack/events",
+        "description": "Transform peer craft praise into an authentic engineering spotlight",
+        "usage_hint": "@colleague [technical context]",
+        "should_escape": false
+      },
+      {
+        "command": "/ama",
+        "url": "https://${APP_DOMAIN}/api/slack/events",
+        "description": "Synthesize architecture Q&A into an engineering FAQ post draft",
+        "usage_hint": "[question or thread_ts]",
+        "should_escape": false
+      },
+      {
+        "command": "/brief",
+        "url": "https://${APP_DOMAIN}/api/slack/events",
+        "description": "Compile an executive milestone digest memo for leadership and investors",
+        "usage_hint": "[period, e.g. Q3 2026]",
+        "should_escape": false
       }
     ]
   },
@@ -65,6 +121,7 @@
         "im:read",
         "users:read",
         "users:read.email",
+        "reactions:read",
         "reactions:write"
       ]
     }

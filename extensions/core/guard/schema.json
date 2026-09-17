@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "GuardDlpScanResult",
+  "description": "Output schema for pre-publish DLP token and credential scanning",
+  "type": "object",
+  "required": ["clean", "findings", "riskScore", "sanitizedText"],
+  "properties": {
+    "clean": {
+      "type": "boolean",
+      "description": "True if zero high-risk credentials, secrets, or PII were detected"
+    },
+    "riskScore": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 100,
+      "description": "Aggregate risk score (0 = clean, 100 = critical leak detected)"
+    },
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["ruleId", "category", "severity", "snippet", "redactedReplacement"],
+        "properties": {
+          "ruleId": { "type": "string" },
+          "category": { "type": "string", "enum": ["api_key", "private_key", "internal_ip", "internal_host", "pii_email", "jwt_token", "aws_secret"] },
+          "severity": { "type": "string", "enum": ["critical", "high", "medium", "low"] },
+          "snippet": { "type": "string" },
+          "redactedReplacement": { "type": "string" }
+        }
+      }
+    },
+    "sanitizedText": {
+      "type": "string",
+      "description": "Post text with all detected credentials safely redacted"
+    }
+  },
+  "additionalProperties": false
+}

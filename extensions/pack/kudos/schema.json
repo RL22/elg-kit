@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "KudosPeerSpotlight",
+  "description": "Output schema for peer technical craft praise turned into an authentic engineering spotlight",
+  "type": "object",
+  "required": ["nomineeHandle", "nominatorHandle", "achievementSummary", "postBody", "firstComment", "wordCount"],
+  "properties": {
+    "nomineeHandle": { "type": "string" },
+    "nominatorHandle": { "type": "string" },
+    "achievementSummary": { "type": "string" },
+    "postBody": {
+      "type": "string",
+      "description": "Link-free peer craft spotlight narrative bounded to 150-200 words"
+    },
+    "firstComment": {
+      "type": "string",
+      "description": "First comment linking to nominee's profile and technical project"
+    },
+    "wordCount": {
+      "type": "integer",
+      "minimum": 150,
+      "maximum": 200
+    }
+  },
+  "additionalProperties": false
+}

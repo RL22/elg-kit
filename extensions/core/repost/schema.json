@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "RepostPerspectiveAdaptation",
+  "description": "Output schema for cross-functional role perspective adaptation",
+  "type": "object",
+  "required": ["originalAuthor", "targetRole", "postBody", "firstComment", "wordCount"],
+  "properties": {
+    "originalAuthor": { "type": "string" },
+    "targetRole": { "type": "string", "enum": ["gtm", "talent", "product", "visionary"] },
+    "postBody": {
+      "type": "string",
+      "description": "Link-free post body adapted to target role perspective, bounded to 150-200 words"
+    },
+    "firstComment": {
+      "type": "string",
+      "description": "First comment giving dual attribution to the original engineer and shortlink"
+    },
+    "wordCount": {
+      "type": "integer",
+      "minimum": 150,
+      "maximum": 200
+    }
+  },
+  "additionalProperties": false
+}

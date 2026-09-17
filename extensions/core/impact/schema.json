@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ImpactReport",
+  "description": "Output schema for on-demand private employee ROI and verified reads reporting",
+  "type": "object",
+  "required": ["memberSlug", "timeframeDays", "totalRawClicks", "humanClicks", "verifiedReads", "estimatedPipelineValue", "topReferrers"],
+  "properties": {
+    "memberSlug": { "type": "string" },
+    "timeframeDays": { "type": "integer", "enum": [7, 30, 90] },
+    "totalRawClicks": { "type": "integer", "minimum": 0 },
+    "humanClicks": { "type": "integer", "minimum": 0 },
+    "botClicksFiltered": { "type": "integer", "minimum": 0 },
+    "verifiedReads": { "type": "integer", "minimum": 0 },
+    "readThroughRate": { "type": "number", "minimum": 0, "maximum": 1 },
+    "estimatedPipelineValue": { "type": "number", "minimum": 0 },
+    "topReferrers": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["source", "count", "percentage"],
+        "properties": {
+          "source": { "type": "string" },
+          "count": { "type": "integer" },
+          "percentage": { "type": "number" }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}
