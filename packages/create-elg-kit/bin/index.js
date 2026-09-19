@@ -531,7 +531,7 @@ KV_REST_API_TOKEN=...
         name: appDisplayName,
         description: `Employee-Led Growth for ${companyName}: authentic technical perspectives, peer reviews, and attribution.`,
         background_color: '#eb6c36',
-        long_description: `Developer-first rails for Employee-Led Growth (ELG) at ${companyName}. Empowers technical teams to share engineering milestones authentically, bypass social algorithmic link penalties with comment-first edge attribution, request pre-publish peer reviews, and generate 1-click personal resharing shortlinks.`,
+        long_description: `Developer-first rails for Employee-Led Growth (ELG) at ${companyName}. Empowers technical teams to share engineering milestones authentically, keep links out of post bodies with comment-first edge attribution, request pre-publish peer reviews, and generate 1-click personal resharing shortlinks.`,
       },
       features: {
         bot_user: {

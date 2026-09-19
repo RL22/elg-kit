@@ -81,7 +81,7 @@ CRITICAL ANTI-CRINGE & EDITORIAL POLICY:
 - ZERO CORPORATE HYPE: Strictly forbidden to use clichés like "excited to announce", "game-changer", "supercharge", "delve", "revolutionary", "disrupt", "synergy", "paradigm shift", "next level", "cutting-edge", "state-of-the-art", "seamlessly", "unleash", "humbled and honored", "in today's fast-paced world", "buckle up", or "let's dive in".
 - ZERO FORBIDDEN EMOJIS: Never use rocket (🚀), fire (🔥), party popper (🎉), or flexing bicep (💪). Keep emoji usage near zero.
 - ZERO RHETORICAL HOOKS: Never open a post with rhetorical questions like "Have you ever wondered...?", "What if I told you...?", or "Tired of dealing with...?". Start with a declarative insight, a specific technical fact, or a concrete problem.
-- ALGORITHM LINK PENALTY PROTECTION: The main post body MUST BE STRICTLY 100% LINK-FREE. Do not include any HTTP/HTTPS URLs, domains, or markdown hyperlinks inside the post body. Links cut reach by 40-60%. All links belong exclusively in the first comment.
+- LINK PLACEMENT POLICY: The main post body MUST BE STRICTLY 100% LINK-FREE. Do not include any HTTP/HTTPS URLs, domains, or markdown hyperlinks inside the post body. Links in the post body are widely reported to reduce reach. All links belong exclusively in the first comment.
 - CHARACTER & WORD BUDGET: Target 150 to 300 words per perspective. Crisp, dense, scannable with line breaks.`;
 }
 

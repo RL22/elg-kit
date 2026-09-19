@@ -1,7 +1,7 @@
 /**
  * @file formatter.ts
  * Formatter and Link Separation Engine:
- * Enforces Algorithm Link Penalty Protection by stripping all links from post_body
+ * Enforces the link placement policy by stripping all links from post_body
  * and generating the attributed go.company.com/e/:member shortlink for first_comment.
  */
 

@@ -134,9 +134,9 @@ export function validateEngineResult(result: PerspectiveEngineResult): {
       continue;
     }
 
-    // Check link penalty protection in post_body
+    // Check link placement policy in post_body
     if (/https?:\/\//i.test(p.post_body)) {
-      errors.push(`Role ${role} post_body contains external link, violating algorithm link protection`);
+      errors.push(`Role ${role} post_body contains external link, violating the link placement policy`);
     }
 
     // Check first_comment contains attributed link

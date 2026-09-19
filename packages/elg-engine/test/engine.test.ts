@@ -223,7 +223,7 @@ Our team has been working on low-latency memory allocators for 6 months.`;
   });
 
   // --------------------------------------------------------------------------
-  // Group 3: Link Separation & Algorithm Link Penalty Protection
+  // Group 3: Link Separation & Link Placement Policy
   // --------------------------------------------------------------------------
   await t.test('Link Separation: strips raw URLs and markdown links from post body', () => {
     const rawPostWithLinks = `Here is our new architectural breakdown. You can read the full documentation at https://company.com/docs/v2 and check out our [GitHub repo](https://github.com/company/repo) for the benchmarks. We also mirrored it at www.example.com/mirror for external testers.`;
@@ -283,7 +283,7 @@ Our team has been working on low-latency memory allocators for 6 months.`;
     assert.ok(sysPrompt.includes('PRODUCT'));
     assert.ok(sysPrompt.includes('ZERO CORPORATE HYPE'));
     assert.ok(sysPrompt.includes('ZERO FORBIDDEN EMOJIS'));
-    assert.ok(sysPrompt.includes('ALGORITHM LINK PENALTY PROTECTION'));
+    assert.ok(sysPrompt.includes('LINK PLACEMENT POLICY'));
   });
 
   await t.test('Prompt Generator: generateRolePrompt compiles targeted prompts for all 5 roles', () => {

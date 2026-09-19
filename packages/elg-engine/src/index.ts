@@ -2,7 +2,7 @@
  * @file index.ts
  * Public entry point for elg-engine (Module 4 & 5 of elg-kit).
  * Quintuple-perspective prompt generator, anti-cringe filter,
- * and algorithm link penalty protection.
+ * and link placement policy.
  */
 
 export * from './types.js';

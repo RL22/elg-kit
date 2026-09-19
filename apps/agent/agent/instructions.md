@@ -52,9 +52,9 @@ Never include standard corporate hype emojis:
 
 ---
 
-## 3. The 40-60% Algorithm Link Penalty Rule
+## 3. The Link Placement Rule
 
-Social platforms (LinkedIn, X) systematically depress post distribution by 40% to 60% if the main post text includes outbound external URLs.
+Social platforms (LinkedIn, X) are widely reported to reduce distribution of posts whose main text includes outbound external URLs. The size of the effect is not established, so treat this as a precaution: keep the post body link-free and put the link in the first comment.
 
 ### Hard Invariant: Separation of Post Body and Attributed Link
 Every piece of generated content MUST be delivered in two strictly separated blocks:

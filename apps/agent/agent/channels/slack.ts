@@ -144,7 +144,7 @@ export function countWords(text: string): number {
 }
 
 /**
- * Strips all external URLs from the post body to avoid the 40-60% social algorithm link penalty.
+ * Strips all external URLs from the post body (links in the body are widely reported to reduce reach).
  */
 export function stripAllUrls(text: string): { cleaned: string; extractedUrls: string[] } {
   const urlRegex = /https?:\/\/[^\s)>]+/gi;
@@ -332,7 +332,7 @@ export class SlackChannelRouter {
             elements: [
               {
                 type: 'mrkdwn',
-                text: '🛡️ *Algorithm Reach Protection:* Social algorithms cut reach by 40-60% on posts with external links. *Do not put this link in your post body.* Post your narrative link-free and drop this link in the very *first comment*!',
+                text: '🛡️ *Link placement:* Links in the post body are widely reported to reduce reach. *Do not put this link in your post body.* Post your narrative link-free and drop this link in the very *first comment*!',
               },
             ],
           },
@@ -1079,7 +1079,7 @@ export class SlackChannelRouter {
             elements: [
               {
                 type: 'mrkdwn',
-                text: '🛡️ *Algorithm Reach Protection:* Social algorithms cut reach by 40-60% on posts with external URLs. Post this narrative link-free and drop the link in your first comment.',
+                text: '🛡️ *Link placement:* Links in the post body are widely reported to reduce reach. Post this narrative link-free and drop the link in your first comment.',
               },
             ],
           },
@@ -1214,7 +1214,7 @@ export class SlackChannelRouter {
         elements: [
           {
             type: 'mrkdwn',
-            text: '🛡️ *Algorithm Reach Protection:* Social algorithms cut reach by 40-60% on posts with external URLs. Keep the post body link-free and drop the link in your first comment.',
+            text: '🛡️ *Link placement:* Links in the post body are widely reported to reduce reach. Keep the post body link-free and drop the link in your first comment.',
           },
         ],
       },

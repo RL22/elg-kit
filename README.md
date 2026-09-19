@@ -23,7 +23,7 @@ That is the difference between **Employee Advocacy** and **Employee-Led Growth**
 
 - **Corporate cringe → role-specific, human drafts.** Generate Builder, GTM, Talent, Visionary, and Product perspectives that follow each employee's voice profile and anti-cringe rules.
 - **Attribution void → one-click personal links.** Give each teammate an attributed edge link with automatic UTM parameters and bot-filtered click telemetry.
-- **Algorithm link penalty → comment-first distribution.** Keep the post body link-free and place the attributed URL in the first comment, where it does not trigger the 40–60% reach penalty associated with external links in posts.
+- **Link reach risk → comment-first distribution.** Keep the post body link-free and place the attributed URL in the first comment. Links in post bodies are widely reported to reduce reach on LinkedIn and X, though the size of the effect is not established, and the comment-first pattern also keeps attribution clean.
 - **Security exposure → verification before distribution.** Validate ingestion with HMAC SHA-256 and replay protection, scan drafts for secrets, and restrict redirects to approved domains.
 - **Program churn → durable participation without rankings.** Use peer review, private impact recaps, and collective celebrations instead of public leaderboards or stack-ranking.
 
