@@ -15,6 +15,8 @@
 
 ## Advocacy vs. Employee-Led Growth
 
+![Employee advocacy vs. Employee-Led Growth: where the post starts, who writes it, who checks it, and where the link goes](docs/employee-advocacy-vs-elg.gif)
+
 Employee advocacy gives people a content calendar. Employee-Led Growth gives them something real to say. Legacy employee-advocacy platforms distribute approved corporate copy; `elg-kit` starts with real shipped work, then helps builders, marketers, designers, sellers, and recruiters explain why it matters in their own voice.
 
 That is the difference between **Employee Advocacy** and **Employee-Led Growth**: ELG is tied to verified work, shaped by the employee, reviewed by a peer, and measured without turning coworkers into a leaderboard.
