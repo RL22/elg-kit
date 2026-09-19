@@ -17,7 +17,7 @@
         "discussionUrl": { "type": "string", "format": "uri" },
         "postBody": {
           "type": "string",
-          "description": "Strictly link-free post body, bounded to 150-200 words"
+          "description": "Strictly link-free post body, capped at 300 words (150 is a soft target)"
         },
         "firstComment": {
           "type": "string",
@@ -25,8 +25,12 @@
         },
         "wordCount": {
           "type": "integer",
-          "minimum": 150,
-          "maximum": 200
+          "minimum": 1,
+          "maximum": 300
+        },
+        "belowTarget": {
+          "type": "boolean",
+          "description": "True when the draft is under the 150-word soft target. Drafts are never padded to reach it."
         }
       },
       "additionalProperties": false

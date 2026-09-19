@@ -4,6 +4,8 @@
  * Zero external dependencies.
  */
 
+import { trimToCeiling } from '../../shared/word-budget.js';
+
 /**
  * Parses user mentions <@U12345|username> or @username from text.
  * @param {string} text
@@ -30,7 +32,7 @@ export function extractNominee(text) {
 }
 
 /**
- * Compiles a peer craft spotlight post bounded to 150-200 words.
+ * Compiles a peer craft spotlight post capped at 300 words (150 is a soft target; drafts are never padded).
  * @param {object} params
  * @param {string} params.nomineeHandle
  * @param {string} params.nominatorHandle
@@ -45,26 +47,5 @@ export function compileKudosBody({ nomineeHandle, nominatorHandle, achievementSu
     `Building alongside engineers who treat operational reliability and architectural simplicity as core virtues is what makes our culture special. Huge appreciation to colleagues who continually raise the technical baseline for everyone around them.`
   ];
 
-  const expansionPool = [
-    `Their work exemplifies how deep craftsmanship directly protects customer uptime and developer velocity across the entire organization.`,
-    `We believe that recognizing engineering rigor openly reinforces the standards that keep our distributed systems resilient at scale.`
-  ];
-
-  let fullText = paragraphs.join('\n\n');
-  let currentWords = fullText.split(/\s+/).filter(Boolean).length;
-
-  let idx = 0;
-  while (currentWords < 150 && idx < expansionPool.length) {
-    paragraphs.splice(paragraphs.length - 1, 0, expansionPool[idx]);
-    fullText = paragraphs.join('\n\n');
-    currentWords = fullText.split(/\s+/).filter(Boolean).length;
-    idx++;
-  }
-
-  const words = fullText.split(/\s+/).filter(Boolean);
-  if (words.length > 200) {
-    fullText = words.slice(0, 195).join(' ') + '.';
-  }
-
-  return fullText;
+  return trimToCeiling(paragraphs.join('\n\n'));
 }

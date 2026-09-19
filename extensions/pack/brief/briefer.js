@@ -4,8 +4,10 @@
  * Zero external dependencies.
  */
 
+import { trimToCeiling } from '../../shared/word-budget.js';
+
 /**
- * Compiles a clean executive digest memo bounded to 150-200 words.
+ * Compiles a clean executive digest memo capped at 300 words (150 is a soft target; drafts are never padded).
  * @param {object} params
  * @param {string} params.period
  * @param {number} params.shippedCount
@@ -23,28 +25,5 @@ export function compileBriefBody({ period, shippedCount, topWins, kpiMetrics }) 
     `By prioritizing foundational system architecture, deterministic edge routing, and automated regression verification, we have substantially expanded our transaction capacity while reducing baseline operating expenditures.`
   ];
 
-  const expansionPool = [
-    `Our technical teams continue to operate with high autonomy, owning features from initial system RFC through real-time production telemetry and incident post-mortems.`,
-    `This rigorous operational discipline ensures our product moats compound sustainably without accumulating unmonitored technical debt or operational drag.`,
-    `We intentionally align platform engineering milestones with customer reliability goals, turning technical rigor directly into enterprise retention and competitive differentiation.`,
-    `Looking ahead, our roadmap focuses on expanding automated governance guardrails to empower every team member to innovate with confidence.`
-  ];
-
-  let fullText = paragraphs.join('\n\n');
-  let currentWords = fullText.split(/\s+/).filter(Boolean).length;
-
-  let idx = 0;
-  while (currentWords < 150 && idx < expansionPool.length) {
-    paragraphs.splice(paragraphs.length - 1, 0, expansionPool[idx]);
-    fullText = paragraphs.join('\n\n');
-    currentWords = fullText.split(/\s+/).filter(Boolean).length;
-    idx++;
-  }
-
-  const words = fullText.split(/\s+/).filter(Boolean);
-  if (words.length > 200) {
-    fullText = words.slice(0, 195).join(' ') + '.';
-  }
-
-  return fullText;
+  return trimToCeiling(paragraphs.join('\n\n'));
 }

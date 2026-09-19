@@ -4,8 +4,10 @@
  * Zero external dependencies.
  */
 
+import { trimToCeiling } from '../../shared/word-budget.js';
+
 /**
- * Compiles a question-and-answer technical post bounded to 150-200 words.
+ * Compiles a question-and-answer technical post capped at 300 words (150 is a soft target; drafts are never padded).
  * @param {object} params
  * @param {string} params.question
  * @param {string} params.answeredBy
@@ -22,28 +24,5 @@ export function compileFaqBody({ question, answeredBy, technicalSummary }) {
     `Detailed architectural decision records and verifiable benchmarks are documented in the discussion thread.`
   ];
 
-  const expansionPool = [
-    `Our profiling confirmed that removing unnecessary network hops resolved tail latency variance across high-concurrency client requests.`,
-    `Continuous automated verification suites run against every build to guarantee zero architectural regressions in production.`,
-    `When teams understand the hardware and network limits of their environment, system designs naturally converge on simpler, more reliable patterns.`,
-    `We believe transparent engineering documentation turns internal problem solving into shared organizational knowledge that benefits everyone.`
-  ];
-
-  let fullText = paragraphs.join('\n\n');
-  let currentWords = fullText.split(/\s+/).filter(Boolean).length;
-
-  let idx = 0;
-  while (currentWords < 150 && idx < expansionPool.length) {
-    paragraphs.splice(paragraphs.length - 2, 0, expansionPool[idx]);
-    fullText = paragraphs.join('\n\n');
-    currentWords = fullText.split(/\s+/).filter(Boolean).length;
-    idx++;
-  }
-
-  const words = fullText.split(/\s+/).filter(Boolean);
-  if (words.length > 200) {
-    fullText = words.slice(0, 195).join(' ') + '.';
-  }
-
-  return fullText;
+  return trimToCeiling(paragraphs.join('\n\n'));
 }

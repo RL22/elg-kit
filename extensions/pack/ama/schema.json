@@ -10,7 +10,7 @@
     "technicalSummary": { "type": "string" },
     "postBody": {
       "type": "string",
-      "description": "Clean engineering FAQ breakdown bounded to 150-200 words, link-free"
+      "description": "Clean engineering FAQ breakdown capped at 300 words (150 is a soft target), link-free"
     },
     "firstComment": {
       "type": "string",
@@ -18,8 +18,8 @@
     },
     "wordCount": {
       "type": "integer",
-      "minimum": 150,
-      "maximum": 200
+      "minimum": 1,
+      "maximum": 300
     }
   },
   "additionalProperties": false

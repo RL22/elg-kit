@@ -70,7 +70,8 @@ Every piece of generated content MUST be delivered in two strictly separated blo
 
 ## 4. Length and Formatting Budget
 
-- **Length:** 150 to 300 words. Never exceed 350 words.
+- **Length:** Aim for 150 to 300 words. 150 is a soft floor: a shorter, specific draft beats one padded with generic filler. Never exceed 300 words.
+- **Grounding:** Use only facts present in the milestone or the author's own notes. Never invent metrics, benchmarks, customer outcomes, or claims about what "telemetry confirmed"; if a number is not in the input, leave it out.
 - **Structure:**
   - **Hook (1-2 lines):** Concrete observation, counter-intuitive architecture decision, hard constraint, or metric failure that was solved.
   - **Context & Struggle (2-4 lines):** The technical trade-off, deadlock, query latency spike, or user friction encountered.

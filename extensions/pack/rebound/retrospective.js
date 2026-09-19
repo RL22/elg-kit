@@ -4,8 +4,10 @@
  * Zero external dependencies.
  */
 
+import { trimToCeiling } from '../../shared/word-budget.js';
+
 /**
- * Compiles a structured retrospective post body bounded to 150-200 words.
+ * Compiles a structured retrospective post body capped at 300 words (150 is a soft target; drafts are never padded).
  * @param {object} params
  * @param {string} params.releaseName
  * @param {number} params.daysInProduction
@@ -30,27 +32,5 @@ export function compileRetrospectiveBody({
     `Our principal architectural takeaway: ${architecturalTakeaway}. In high-concurrency distributed systems, clever abstractions almost always conceal hidden operational costs. Simplicity, deterministic state transitions, and explicit error bounds beat distributed consensus every time.`
   ];
 
-  const expansionPool = [
-    `We instrumented end-to-end tracing across every edge node to guarantee transparent debuggability when transient network anomalies occur.`,
-    `Our production benchmark suite runs nightly against synthetic load spikes to ensure that tail latency stays strictly within defined SLA limits.`,
-    `Documenting these operational trade-offs openly ensures that our engineering culture remains anchored in verifiable production evidence.`
-  ];
-
-  let fullText = paragraphs.join('\n\n');
-  let currentWords = fullText.split(/\s+/).filter(Boolean).length;
-
-  let idx = 0;
-  while (currentWords < 150 && idx < expansionPool.length) {
-    paragraphs.splice(paragraphs.length - 1, 0, expansionPool[idx]);
-    fullText = paragraphs.join('\n\n');
-    currentWords = fullText.split(/\s+/).filter(Boolean).length;
-    idx++;
-  }
-
-  const words = fullText.split(/\s+/).filter(Boolean);
-  if (words.length > 200) {
-    fullText = words.slice(0, 195).join(' ') + '.';
-  }
-
-  return fullText;
+  return trimToCeiling(paragraphs.join('\n\n'));
 }

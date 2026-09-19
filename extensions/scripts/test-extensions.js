@@ -15,6 +15,7 @@ import { compileFaqBody } from '../pack/ama/synthesizer.js';
 import { compileBriefBody } from '../pack/brief/briefer.js';
 import { matchAdvocatesForTopic } from '../meta/cohort/roster.js';
 import { auditDestinationUrl } from '../meta/governance/auditor.js';
+import { trimToCeiling, wordBudgetStatus, countWords, WORD_CEILING, WORD_TARGET_MIN } from '../shared/word-budget.js';
 
 describe('ELG Kit Extensions Test Suite', () => {
 
@@ -93,13 +94,113 @@ describe('ELG Kit Extensions Test Suite', () => {
     });
   });
 
+  describe('Shared: word budget contract', () => {
+    test('exposes a 150-word soft target and a 300-word hard ceiling', () => {
+      assert.equal(WORD_TARGET_MIN, 150);
+      assert.equal(WORD_CEILING, 300);
+    });
+
+    test('leaves text at or under the ceiling untouched, including paragraph breaks', () => {
+      const text = 'First paragraph here.\n\nSecond paragraph here.';
+      assert.equal(trimToCeiling(text), text);
+    });
+
+    test('trims text over the ceiling at a sentence boundary', () => {
+      const sentence = 'This sentence has exactly seven words in it. ';
+      const long = sentence.repeat(60).trim();
+      assert.ok(countWords(long) > WORD_CEILING);
+      const trimmed = trimToCeiling(long);
+      assert.ok(countWords(trimmed) <= WORD_CEILING);
+      assert.ok(trimmed.endsWith('.'));
+      assert.ok(!trimmed.endsWith('This sentence has exactly seven words in it'));
+    });
+
+    test('an exactly-300-word text is returned unchanged', () => {
+      const exact = Array.from({ length: WORD_CEILING }, (_, i) => `w${i}`).join(' ');
+      assert.equal(trimToCeiling(exact), exact);
+    });
+
+    test('trims CRLF text at a sentence end instead of mid-sentence', () => {
+      const para = 'This sentence has exactly seven words in it. '.repeat(20).trim();
+      const long = Array.from({ length: 4 }, () => para).join('\r\n\r\n');
+      assert.ok(countWords(long) > WORD_CEILING);
+      const trimmed = trimToCeiling(long);
+      assert.ok(countWords(trimmed) <= WORD_CEILING);
+      assert.ok(/in it\.$/.test(trimmed), `expected a clean sentence end, got: ...${trimmed.slice(-30)}`);
+    });
+
+    test('keeps a closing quote when the last sentence ends inside quotation marks', () => {
+      const sentence = 'She said the fix was "simple and boring." ';
+      const long = sentence.repeat(60).trim();
+      const trimmed = trimToCeiling(long);
+      assert.ok(countWords(trimmed) <= WORD_CEILING);
+      assert.ok(trimmed.endsWith('boring."'), `got: ...${trimmed.slice(-20)}`);
+    });
+
+    test('text with no sentence ends is cut at the ceiling and closed with a period', () => {
+      const noEnds = Array.from({ length: 400 }, (_, i) => `word${i}`).join(' ');
+      const trimmed = trimToCeiling(noEnds);
+      assert.ok(countWords(trimmed) <= WORD_CEILING);
+      assert.ok(trimmed.endsWith('.'));
+    });
+
+    test('flags drafts below the soft target without failing them', () => {
+      const status = wordBudgetStatus('Short honest draft.');
+      assert.equal(status.belowTarget, true);
+      assert.equal(status.overCeiling, false);
+    });
+  });
+
+  describe('Generators never pad short drafts with filler', () => {
+    const FILLER = [
+      'Customer success teams report zero operational regressions',
+      'Our profiling confirmed that removing unnecessary network hops',
+      'Their work exemplifies how deep craftsmanship',
+      'We instrumented end-to-end tracing across every edge node',
+      'Our technical teams continue to operate with high autonomy'
+    ];
+
+    test('a short repost stays short, is flagged below target, and contains no canned filler', () => {
+      const adapted = boundAdaptedBody('We cut p99 latency from 240ms to 18ms.', 'gtm');
+      assert.equal(wordBudgetStatus(adapted).belowTarget, true);
+      assert.ok(adapted.includes('240ms to 18ms'));
+      for (const line of FILLER) assert.ok(!adapted.includes(line), `filler present: ${line}`);
+    });
+
+    test('an oversized repost is trimmed to the ceiling without dropping the author input', () => {
+      const long = 'Our team rewrote the ingestion path to remove a global lock. '.repeat(80).trim();
+      const adapted = boundAdaptedBody(long, 'talent');
+      assert.ok(countWords(adapted) <= WORD_CEILING);
+      assert.ok(adapted.includes('rewrote the ingestion path'));
+    });
+
+    test('kudos, AMA, brief, and retrospective outputs contain no canned filler', () => {
+      const outputs = [
+        compileKudosBody({ nomineeHandle: 'marcus', nominatorHandle: 'jordan', achievementSummary: 'fixing a buffer race' }),
+        compileFaqBody({ question: 'Why gRPC?', answeredBy: '@elena', technicalSummary: 'Binary framing cut CPU by 35%.' }),
+        compileBriefBody({ period: 'Q3', shippedCount: 3, topWins: ['a', 'b'], kpiMetrics: { latencyDelta: '-5%', infrastructureCostDelta: '-2%', uptime: '99.9%' } }),
+        compileRetrospectiveBody({ releaseName: 'X', daysInProduction: 90, originalThesis: 't', metricsDelta: 'm', unexpectedEdgeCases: 'e', architecturalTakeaway: 'k' })
+      ];
+      for (const body of outputs) {
+        for (const line of FILLER) assert.ok(!body.includes(line), `filler present: ${line}`);
+        assert.equal(wordBudgetStatus(body).belowTarget, true, 'short inputs must stay short instead of being padded to 150');
+      }
+    });
+
+    test('output length tracks the input: a longer input yields a longer draft, not the same padded length', () => {
+      const short = compileKudosBody({ nomineeHandle: 'marcus', nominatorHandle: 'jordan', achievementSummary: 'fixing a race' });
+      const longer = compileKudosBody({ nomineeHandle: 'marcus', nominatorHandle: 'jordan', achievementSummary: 'fixing a race condition in the buffer pool that only appeared under sustained write load across regions' });
+      assert.ok(countWords(longer) > countWords(short));
+    });
+  });
+
   describe('Core: Repost Adapter', () => {
-    test('bounds adapted body strictly between 150 and 200 words and eliminates links', () => {
+    test('formats adapted body under the 300-word ceiling and eliminates links', () => {
       const rawText = 'We refactored our stream pipeline to use zero-copy buffers. Latency fell 60%. Visit https://example.com for docs.';
       const adapted = boundAdaptedBody(rawText, 'gtm');
       const words = adapted.split(/\s+/).filter(Boolean).length;
 
-      assert.ok(words >= 150 && words <= 200, `Word count ${words} not between 150 and 200`);
+      assert.ok(words > 0 && words <= WORD_CEILING, `Word count ${words} exceeds the ${WORD_CEILING}-word ceiling`);
       assert.ok(!adapted.includes('https://example.com'));
     });
 
@@ -111,7 +212,7 @@ describe('ELG Kit Extensions Test Suite', () => {
   });
 
   describe('Extension Pack: Rebound Retrospective', () => {
-    test('compiles retrospective body between 150 and 200 words', () => {
+    test('compiles retrospective body under the 300-word ceiling', () => {
       const body = compileRetrospectiveBody({
         releaseName: 'Edge Gateway v2',
         daysInProduction: 180,
@@ -122,13 +223,13 @@ describe('ELG Kit Extensions Test Suite', () => {
       });
 
       const words = body.split(/\s+/).filter(Boolean).length;
-      assert.ok(words >= 150 && words <= 200, `Word count ${words} not between 150 and 200`);
+      assert.ok(words > 0 && words <= WORD_CEILING, `Word count ${words} exceeds the ${WORD_CEILING}-word ceiling`);
       assert.ok(body.includes('180 days ago'));
     });
   });
 
   describe('Extension Pack: Kudos Spotlight', () => {
-    test('extracts nominee mentions and compiles post body between 150 and 200 words', () => {
+    test('extracts nominee mentions and compiles post body under the 300-word ceiling', () => {
       const { handle, cleanedText } = extractNominee('<@U98765|marcus> for fixing the race condition in the buffer');
       assert.equal(handle, 'marcus');
       assert.equal(cleanedText, 'for fixing the race condition in the buffer');
@@ -140,13 +241,13 @@ describe('ELG Kit Extensions Test Suite', () => {
       });
 
       const words = body.split(/\s+/).filter(Boolean).length;
-      assert.ok(words >= 150 && words <= 200, `Word count ${words} not between 150 and 200`);
+      assert.ok(words > 0 && words <= WORD_CEILING, `Word count ${words} exceeds the ${WORD_CEILING}-word ceiling`);
       assert.ok(body.includes('marcus'));
     });
   });
 
   describe('Extension Pack: AMA & Brief', () => {
-    test('compiles AMA FAQ body between 150 and 200 words', () => {
+    test('compiles AMA FAQ body under the 300-word ceiling', () => {
       const body = compileFaqBody({
         question: 'Why did we drop GraphQL for gRPC?',
         answeredBy: '@elena',
@@ -154,11 +255,11 @@ describe('ELG Kit Extensions Test Suite', () => {
       });
 
       const words = body.split(/\s+/).filter(Boolean).length;
-      assert.ok(words >= 150 && words <= 200, `Word count ${words} not between 150 and 200`);
+      assert.ok(words > 0 && words <= WORD_CEILING, `Word count ${words} exceeds the ${WORD_CEILING}-word ceiling`);
       assert.ok(body.includes('Why did we drop GraphQL for gRPC'));
     });
 
-    test('compiles Executive Brief body between 150 and 200 words', () => {
+    test('compiles Executive Brief body under the 300-word ceiling', () => {
       const body = compileBriefBody({
         period: 'September 2026',
         shippedCount: 12,
@@ -175,7 +276,7 @@ describe('ELG Kit Extensions Test Suite', () => {
       });
 
       const words = body.split(/\s+/).filter(Boolean).length;
-      assert.ok(words >= 150 && words <= 200, `Word count ${words} not between 150 and 200`);
+      assert.ok(words > 0 && words <= WORD_CEILING, `Word count ${words} exceeds the ${WORD_CEILING}-word ceiling`);
       assert.ok(body.includes('September 2026'));
     });
   });

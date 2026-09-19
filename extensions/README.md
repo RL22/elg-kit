@@ -50,7 +50,7 @@ Every generated post or artifact across Core 5, Extension Pack, and Admin Meta-S
 
 | Boundary Dimension | Deterministic Standard | Automated Verification |
 | :--- | :--- | :--- |
-| **Post Word Budget** | Exactly **150 to 200 words** in post body | `countWords(body) >= 150 && countWords(body) <= 200` |
+| **Post Word Budget** | **150-word soft target, 300-word hard ceiling.** Drafts under 150 words are never padded with filler (callers can flag them with `wordBudgetStatus`); drafts over 300 are trimmed at a sentence boundary | `wordBudgetStatus(body)` returns `belowTarget` and `overCeiling` (`extensions/shared/word-budget.js`) |
 | **Link Separation** | **Zero external URLs** in post body | `stripAllUrls(body).extractedUrls.length === 0` |
 | **First Comment Rule** | Personal attributed shortlink strictly in **Comment #1** | `${EDGE_BASE_URL}/e/${memberSlug}` in first comment block |
 | **Tone Guard** | Authentic engineer voice; zero hype clichés or emojis | `sanitizeInsightText(body)` strips `[🚀🔥🎉💪📈✨]` and buzzwords |
@@ -69,11 +69,11 @@ Harvests high-signal technical insights from Slack thread replies and converts t
   1. *Timestamp Resolution:* Extract numeric Slack timestamp via `parseThreadTimestamp(text, command.thread_ts)`.
   2. *Thread Retrieval:* Fetch replies using `app.client.conversations.replies`.
   3. *Signal Identification:* Find candidate technical message via `identifyHighSignalComment()`.
-  4. *Deterministic Formatting:* Run `formatHarvestedDraft()` to bound post body to 150–200 words and format attributed link into comment #1.
+  4. *Deterministic Formatting:* Run `formatHarvestedDraft()` to cap the post body at 300 words and format attributed link into comment #1.
   5. *Delivery:* Send interactive Block Kit card with `[ 📢 Share to #showcase ]` button.
 - **Contract Schema:** [`extensions/core/harvest/schema.json`](core/harvest/schema.json)
 - **Handler Snippet:** [`extensions/core/harvest/handler.snippet.ts`](core/harvest/handler.snippet.ts)
-- **Completion Criterion:** Ephemeral message or author DM is delivered; payload contains valid draft with word count in [150, 200] and 0 body links.
+- **Completion Criterion:** Ephemeral message or author DM is delivered; payload contains a valid draft with word count at or under 300 (`belowTarget` is set when under 150) and 0 body links.
 
 ---
 
@@ -104,7 +104,7 @@ Analyzes user's public technical conversations over the preceding 7 days, scores
   2. *Signal Scoring:* Compute signal score [0, 100] via `scoreMessageSignal()` using tech keyword density, code block markers, resolution signals, and engagement count.
   3. *Candidate Ranking:* Filter and sort candidates with `rankMessages(messages, 45)`.
   4. *Inference Synthesis:* Call Tier 2 `workhorse` model with top candidate text.
-  5. *Deterministic Encasement:* Bound draft to 150–200 words, strip links, and append attributed edge shortlink.
+  5. *Deterministic Encasement:* Cap draft at 300 words (150 is a soft target), strip links, and append attributed edge shortlink.
 - **Contract Schema:** [`extensions/core/suggest/schema.json`](core/suggest/schema.json)
 - **Miner Engine:** [`extensions/core/suggest/miner.js`](core/suggest/miner.js)
 - **Handler Snippet:** [`extensions/core/suggest/handler.snippet.ts`](core/suggest/handler.snippet.ts)
@@ -131,19 +131,19 @@ Provides employees with on-demand, strictly private reporting on human visitors,
 
 ### 3.5 `/repost` — Cross-Functional Perspective Adapter
 
-Translates a technical post or release into GTM, Talent, or Product perspectives while preserving technical veracity, enforcing the 150–200 word budget, and crediting the original engineer.
+Translates a technical post or release into GTM, Talent, or Product perspectives while preserving technical veracity, enforcing the 300-word ceiling, and crediting the original engineer.
 
 - **Trigger:** Explicit command `/repost [quote_or_url] --role [gtm | talent | product]`.
 - **In-File Steps:**
   1. *Role Extraction:* Parse `--role` argument (defaults to `gtm`).
   2. *Workhorse Adaptation:* Dispatch to Tier 2 `workhorse` with role prompt directives.
-  3. *Deterministic Bounding:* Execute `boundAdaptedBody(text, role)` ensuring 150–200 words and zero body links.
+  3. *Deterministic Bounding:* Execute `boundAdaptedBody(text, role)` ensuring at most 300 words and zero body links.
   4. *Dual Attribution:* Execute `formatDualAttribution(originalAuthor, edgeUrl, role)` in comment #1.
   5. *Delivery:* Send ephemeral preview with `[ 📢 Share to #showcase ]` button.
 - **Contract Schema:** [`extensions/core/repost/schema.json`](core/repost/schema.json)
 - **Adapter Engine:** [`extensions/core/repost/adapter.js`](core/repost/adapter.js)
 - **Handler Snippet:** [`extensions/core/repost/handler.snippet.ts`](core/repost/handler.snippet.ts)
-- **Completion Criterion:** Output contains role-adapted text bounded to 150–200 words, dual-attribution first comment, and valid interactive button.
+- **Completion Criterion:** Output contains role-adapted text at most 300 words, dual-attribution first comment, and valid interactive button.
 
 ---
 
@@ -157,12 +157,12 @@ Generates authentic longitudinal retrospectives comparing original launch theses
 - **In-File Steps:**
   1. *Parameters Extraction:* Parse release name and milestone days.
   2. *Retrospective Formulation:* Assemble thesis, production telemetry delta, unexpected edge cases, and architectural takeaway.
-  3. *Deterministic Synthesis:* Run `compileRetrospectiveBody()` guaranteeing [150, 200] words.
+  3. *Deterministic Synthesis:* Run `compileRetrospectiveBody()` capped at 300 words, never padded.
   4. *Delivery:* Send interactive ephemeral card linking to RFC/post-mortem.
 - **Contract Schema:** [`extensions/pack/rebound/schema.json`](pack/rebound/schema.json)
 - **Retrospective Engine:** [`extensions/pack/rebound/retrospective.js`](pack/rebound/retrospective.js)
 - **Handler Snippet:** [`extensions/pack/rebound/handler.snippet.ts`](pack/rebound/handler.snippet.ts)
-- **Completion Criterion:** Produces 150–200 word production retrospective draft with zero body links and verifiable metrics delta.
+- **Completion Criterion:** Produces a production retrospective draft of at most 300 words with zero body links and verifiable metrics delta.
 
 ---
 
@@ -174,12 +174,12 @@ Transforms internal peer praise (e.g. from `#shoutouts`) into an authentic exter
 - **In-File Steps:**
   1. *Nominee Parsing:* Extract user handle via `extractNominee(text)`.
   2. *Craft Narrative:* Compile technical problem solved, root cause discipline, and team impact via `compileKudosBody()`.
-  3. *Deterministic Bounding:* Enforce 150–200 words and zero body links.
+  3. *Deterministic Bounding:* Enforce a 300-word ceiling and zero body links.
   4. *Delivery:* Send ephemeral draft giving spotlight credit to nominee and link to team engineering profile.
 - **Contract Schema:** [`extensions/pack/kudos/schema.json`](pack/kudos/schema.json)
 - **Spotlight Engine:** [`extensions/pack/kudos/spotlight.js`](pack/kudos/spotlight.js)
 - **Handler Snippet:** [`extensions/pack/kudos/handler.snippet.ts`](pack/kudos/handler.snippet.ts)
-- **Completion Criterion:** Produces 150–200 word craft spotlight celebrating nominee with zero body links and dual attribution.
+- **Completion Criterion:** Produces a craft spotlight of at most 300 words celebrating nominee with zero body links and dual attribution.
 
 ---
 
@@ -191,12 +191,12 @@ Synthesizes high-quality internal Slack Q&A discussions and office hours threads
 - **In-File Steps:**
   1. *Q&A Extraction:* Parse question and author response.
   2. *Synthesis:* Compile FAQ narrative highlighting trade-offs and benchmark evidence via `compileFaqBody()`.
-  3. *Deterministic Bounding:* Enforce [150, 200] word limit and zero body links.
+  3. *Deterministic Bounding:* Enforce a 300-word ceiling and zero body links.
   4. *Delivery:* Send ephemeral draft with attributed link to architectural decision record (ADR).
 - **Contract Schema:** [`extensions/pack/ama/schema.json`](pack/ama/schema.json)
 - **Synthesizer Engine:** [`extensions/pack/ama/synthesizer.js`](pack/ama/synthesizer.js)
 - **Handler Snippet:** [`extensions/pack/ama/handler.snippet.ts`](pack/ama/handler.snippet.ts)
-- **Completion Criterion:** Produces 150–200 word FAQ post draft answering the technical question with zero body links.
+- **Completion Criterion:** Produces an FAQ post draft of at most 300 words answering the technical question with zero body links.
 
 ---
 
@@ -208,12 +208,12 @@ Compiles high-density, numbers-grounded engineering milestone memos for leadersh
 - **In-File Steps:**
   1. *Milestone Aggregation:* Collect shipped milestones, performance deltas (p99 latency, cost, uptime).
   2. *Brief Formulation:* Run `compileBriefBody()` generating structured memo with bullet wins and KPI indicators.
-  3. *Deterministic Bounding:* Enforce [150, 200] words and zero body links.
+  3. *Deterministic Bounding:* Enforce a 300-word ceiling and zero body links.
   4. *Delivery:* Send ephemeral draft with attributed link to full roadmap.
 - **Contract Schema:** [`extensions/pack/brief/schema.json`](pack/brief/schema.json)
 - **Briefer Engine:** [`extensions/pack/brief/briefer.js`](pack/brief/briefer.js)
 - **Handler Snippet:** [`extensions/pack/brief/handler.snippet.ts`](pack/brief/handler.snippet.ts)
-- **Completion Criterion:** Produces 150–200 word executive brief containing verified KPIs and zero body links.
+- **Completion Criterion:** Produces an executive brief of at most 300 words containing verified KPIs and zero body links.
 
 ---
 
@@ -264,7 +264,7 @@ node --test extensions/scripts/test-extensions.js
 - [x] Guard DLP scanner detects AWS keys, Slack tokens, JWTs, and internal hosts while passing clean text.
 - [x] Suggest miner correctly scores high-signal technical content and penalizes small talk.
 - [x] Impact calculator correctly isolates human clicks from bot scrapers and calculates pipeline value.
-- [x] Repost, Rebound, Kudos, AMA, and Brief generators strictly guarantee 150–200 words and zero body links.
+- [x] Repost, Rebound, Kudos, AMA, and Brief generators never exceed 300 words, never pad short drafts, and contain zero body links.
 - [x] Governance auditor approves valid wildcard subdomains and rejects spoofing or open redirects.
 - [x] Cohort roster matcher balances advocate capacity utilization.
-- [x] All 15 tests pass with 0 failures and 0 errors.
+- [x] All 27 tests pass with 0 failures and 0 errors.

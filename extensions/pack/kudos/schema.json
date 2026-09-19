@@ -10,7 +10,7 @@
     "achievementSummary": { "type": "string" },
     "postBody": {
       "type": "string",
-      "description": "Link-free peer craft spotlight narrative bounded to 150-200 words"
+      "description": "Link-free peer craft spotlight narrative capped at 300 words (150 is a soft target)"
     },
     "firstComment": {
       "type": "string",
@@ -18,8 +18,8 @@
     },
     "wordCount": {
       "type": "integer",
-      "minimum": 150,
-      "maximum": 200
+      "minimum": 1,
+      "maximum": 300
     }
   },
   "additionalProperties": false
