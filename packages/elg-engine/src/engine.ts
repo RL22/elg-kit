@@ -14,6 +14,7 @@ import {
   formatPerspectivePost,
   stripLinks,
 } from './formatter.js';
+import { perspectiveForRole } from './routing.js';
 import {
   generateQuintuplePrompt,
   generateRolePrompt,
@@ -100,6 +101,7 @@ export function formatEngineResult(
     member_slug: norm.memberSlug,
     target_url: norm.targetUrl,
     redirect_host: norm.redirectHost,
+    recommended_perspective: perspectiveForRole(norm.authorRole),
     perspectives: {
       builder: perspectives.builder,
       gtm: perspectives.gtm,
@@ -174,6 +176,10 @@ export class PerspectiveEngine {
 
   getSystemPrompt(): string {
     return getSystemPrompt();
+  }
+
+  recommendPerspective(authorRole?: string | null): PerspectiveRole | null {
+    return perspectiveForRole(authorRole);
   }
 
   generateQuintuplePrompt(milestone: MilestonePayload, options?: PromptOptions): string {

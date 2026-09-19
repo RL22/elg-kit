@@ -45,6 +45,8 @@ export interface MilestonePayload {
   changelogSummary?: string;
   changelog_summary?: string;
   author: string | GitAuthor;
+  authorRole?: string;
+  author_role?: string;
   issueReferences?: string[];
   issue_references?: string[];
   targetUrl?: string;
@@ -72,6 +74,7 @@ export interface NormalizedMilestone {
   title: string;
   changelogSummary: string;
   author: GitAuthor;
+  authorRole?: string;
   issueReferences: string[];
   targetUrl?: string;
   memberSlug: string;
@@ -108,6 +111,8 @@ export interface PerspectiveEngineResult {
   member_slug: string;
   target_url?: string;
   redirect_host: string;
+  /** Perspective that best fits the author's role, or null when the role is unknown. */
+  recommended_perspective: PerspectiveRole | null;
   perspectives: {
     builder: PerspectiveOutput;
     gtm: PerspectiveOutput;

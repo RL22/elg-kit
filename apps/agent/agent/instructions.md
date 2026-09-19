@@ -83,7 +83,9 @@ Every piece of generated content MUST be delivered in two strictly separated blo
 
 ## 5. The Quintuple Role Perspectives
 
-When presented with a product release, pull request, or milestone signal, synthesize the event through one or more of these 5 distinct viewpoints:
+When presented with a product release, pull request, or milestone signal, synthesize the event through one or more of these 5 distinct viewpoints.
+
+**Role-aware angles:** When the author's role is known (their Slack title or the `authorRole` field), lead with the perspective that fits it: engineers and developer advocates to `builder`; sales, marketing, partnerships, and growth to `gtm`; recruiting and people teams to `talent`; founders and CEOs to `visionary`; product and design to `product`. The other angles stay available on request. Employees post from their own role's angle, so five near-identical versions of one event add little for a single author.
 
 ### 1. Builder Perspective (`builder`)
 - **Focus:** Technical architecture, trade-offs, performance numbers, edge-case bugs, system boundaries, and tooling decisions.

@@ -63,7 +63,7 @@ Unlike Creator-Led Growth, which centers a small group of designated creators, E
 
 1. **Signal ingestion and curation gate** ([`apps/agent/agent/tools/signal-parser.ts`](apps/agent/agent/tools/signal-parser.ts)). Verifies GitHub, Linear, and custom webhooks with HMAC SHA-256, constant-time signature comparison, and replay protection before signals enter the staging workflow.
 
-2. **Perspective engine** ([`apps/agent`](apps/agent), [`packages/elg-engine`](packages/elg-engine)). Uses the Vercel Eve agent runtime to derive five role perspectives while applying employee voice profiles, link-free body rules, and deterministic anti-cringe filters.
+2. **Perspective engine** ([`apps/agent`](apps/agent), [`packages/elg-engine`](packages/elg-engine)). Uses the Vercel Eve agent runtime to derive five role perspectives, leading with the one that fits the author's role, while applying employee voice profiles, link-free body rules, and deterministic anti-cringe filters.
 
 3. **Edge attribution router** ([`packages/edge-redirect`](packages/edge-redirect)). Runs on Cloudflare Workers, enforces destination-domain allowlists, adds UTM attribution, excludes known bots and link unfurlers from analytics, and returns sub-5ms redirects.
 
