@@ -12,6 +12,7 @@
 import {
   DEFAULT_REDIRECT_HOST,
 } from './formatter.js';
+import { orderPerspectivesForRole, perspectiveForRole } from './routing.js';
 import {
   GitAuthor,
   MilestonePayload,
@@ -38,6 +39,7 @@ export function normalizeMilestone(input: MilestonePayload): NormalizedMilestone
 
   const targetUrl = input.targetUrl || input.target_url;
   const redirectHost = input.redirectHost || input.redirect_host || DEFAULT_REDIRECT_HOST;
+  const authorRole = input.authorRole || input.author_role;
   const changelogSummary = input.changelogSummary || input.changelog_summary || '';
   const issueReferences = input.issueReferences || input.issue_references || [];
   const openRoles = input.openRoles || input.open_roles || [];
@@ -51,6 +53,7 @@ export function normalizeMilestone(input: MilestonePayload): NormalizedMilestone
     title: input.title,
     changelogSummary,
     author: authorObj,
+    authorRole,
     issueReferences,
     targetUrl,
     memberSlug,
@@ -81,7 +84,7 @@ CRITICAL ANTI-CRINGE & EDITORIAL POLICY:
 - ZERO CORPORATE HYPE: Strictly forbidden to use clichés like "excited to announce", "game-changer", "supercharge", "delve", "revolutionary", "disrupt", "synergy", "paradigm shift", "next level", "cutting-edge", "state-of-the-art", "seamlessly", "unleash", "humbled and honored", "in today's fast-paced world", "buckle up", or "let's dive in".
 - ZERO FORBIDDEN EMOJIS: Never use rocket (🚀), fire (🔥), party popper (🎉), or flexing bicep (💪). Keep emoji usage near zero.
 - ZERO RHETORICAL HOOKS: Never open a post with rhetorical questions like "Have you ever wondered...?", "What if I told you...?", or "Tired of dealing with...?". Start with a declarative insight, a specific technical fact, or a concrete problem.
-- ALGORITHM LINK PENALTY PROTECTION: The main post body MUST BE STRICTLY 100% LINK-FREE. Do not include any HTTP/HTTPS URLs, domains, or markdown hyperlinks inside the post body. Links cut reach by 40-60%. All links belong exclusively in the first comment.
+- LINK PLACEMENT POLICY: The main post body MUST BE STRICTLY 100% LINK-FREE. Do not include any HTTP/HTTPS URLs, domains, or markdown hyperlinks inside the post body. Links in the post body are widely reported to reduce reach. All links belong exclusively in the first comment.
 - CHARACTER & WORD BUDGET: Target 150 to 300 words per perspective. Crisp, dense, scannable with line breaks.`;
 }
 
@@ -139,6 +142,9 @@ export function formatMilestoneContext(norm: NormalizedMilestone): string {
 
   parts.push(`MILESTONE TITLE: ${norm.title}`);
   parts.push(`AUTHOR: ${norm.author.name}${norm.author.username ? ` (@${norm.author.username})` : ''}`);
+  if (norm.authorRole) {
+    parts.push(`AUTHOR ROLE: ${norm.authorRole}`);
+  }
 
   if (norm.changelogSummary) {
     parts.push(`CHANGELOG / RELEASE SUMMARY:\n${norm.changelogSummary}`);
@@ -279,26 +285,20 @@ export function generateQuintuplePrompt(
   const minWords = options.minWords ?? 150;
   const maxWords = options.maxWords ?? 300;
 
+  const orderedRoles = orderPerspectivesForRole(norm.authorRole);
+  const primaryRole = perspectiveForRole(norm.authorRole);
+  const roleList = orderedRoles.map((r, i) => `${i + 1}. ${r}:\n${ROLE_GUIDELINES[r]}`).join('\n\n');
+  const leadNote = primaryRole
+    ? `\nAUTHOR ROLE MATCH: "${norm.authorRole}" fits the ${primaryRole.toUpperCase()} perspective best. List it first and make it the most natural post for this author, while keeping all five perspectives distinct.\n`
+    : '';
+
   let prompt = `${getSystemPrompt()}
 
 ---
 
 ROLES TO GENERATE:
-1. builder:
-${ROLE_GUIDELINES.builder}
-
-2. gtm:
-${ROLE_GUIDELINES.gtm}
-
-3. talent:
-${ROLE_GUIDELINES.talent}
-
-4. visionary:
-${ROLE_GUIDELINES.visionary}
-
-5. product:
-${ROLE_GUIDELINES.product}
-
+${roleList}
+${leadNote}
 ---
 
 INPUT MILESTONE:

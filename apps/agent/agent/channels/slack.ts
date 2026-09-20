@@ -45,9 +45,10 @@ export interface HarvestedDraft {
   authorId: string;
   memberSlug: string;
   discussionUrl: string;
-  postBody: string; // Strictly link-free, 150-200 words
+  postBody: string; // Strictly link-free, at most 300 words
   firstComment: string; // Contains attributed personal shortlink
   wordCount: number;
+  belowTarget: boolean; // Under the 150-word soft target; the draft is never padded to reach it
 }
 
 export interface HarvestResult {
@@ -143,8 +144,13 @@ export function countWords(text: string): number {
   return text.trim().split(/\s+/).filter(Boolean).length;
 }
 
+/** Soft target: shorter drafts are flagged via `belowTarget`, never padded with filler. */
+export const WORD_TARGET_MIN = 150;
+/** Hard ceiling: longer drafts are trimmed. */
+export const WORD_CEILING = 300;
+
 /**
- * Strips all external URLs from the post body to avoid the 40-60% social algorithm link penalty.
+ * Strips all external URLs from the post body (links in the body are widely reported to reduce reach).
  */
 export function stripAllUrls(text: string): { cleaned: string; extractedUrls: string[] } {
   const urlRegex = /https?:\/\/[^\s)>]+/gi;
@@ -164,9 +170,10 @@ export function stripAllUrls(text: string): { cleaned: string; extractedUrls: st
 }
 
 /**
- * Synthesizes an authentic, link-free engineering post draft strictly within 150-200 words.
+ * Synthesizes a link-free engineering post draft of at most 300 words. Drafts under 150 words are
+ * flagged (`belowTarget`) rather than padded with filler.
  */
-export function synthesizeHarvestedPostBody(rawInsight: string): { text: string; words: number } {
+export function synthesizeHarvestedPostBody(rawInsight: string): { text: string; words: number; belowTarget: boolean } {
   const sanitized = sanitizeInsightText(rawInsight);
   const { cleaned: noUrls } = stripAllUrls(sanitized);
 
@@ -188,43 +195,14 @@ export function synthesizeHarvestedPostBody(rawInsight: string): { text: string;
   let fullText = paragraphs.join('\n\n');
   let currentWords = countWords(fullText);
 
-  const expansionPool = [
-    'By shifting coordination off the critical path, background worker threads operate independently without blocking active client requests.',
-    'This decoupling prevents cascaded failovers during transient network partitions, maintaining predictable throughput under sustained peak load.',
-    'Observability telemetry confirmed that eliminating shared lock contention resolved tail latency spikes across all distributed edge nodes.',
-    'Our benchmark traces verified zero deadlocks across millions of concurrent state transitions during production simulations.',
-    'Prioritizing deterministic data flow over centralized orchestration consistently yields simpler failure domains and easier disaster recovery.',
-  ];
-
-  let expandIdx = 0;
-  while (currentWords < 150 && expandIdx < expansionPool.length) {
-    paragraphs.splice(paragraphs.length - 2, 0, expansionPool[expandIdx]);
-    fullText = paragraphs.join('\n\n');
-    currentWords = countWords(fullText);
-    expandIdx++;
-  }
-
-  // If over 200 words, trim from middle paragraphs
-  while (currentWords > 200 && paragraphs.length > 3) {
+  // Over the ceiling: drop middle paragraphs first, keeping the author's quote (first) and the signpost (last).
+  while (currentWords > WORD_CEILING && paragraphs.length > 3) {
     paragraphs.splice(1, 1);
     fullText = paragraphs.join('\n\n');
     currentWords = countWords(fullText);
   }
 
-  // Fine-tune if still over 200 words
-  while (currentWords > 200) {
-    const p3Words = paragraphs[2].split(/\s+/);
-    if (p3Words.length > 10) {
-      p3Words.pop();
-      paragraphs[2] = p3Words.join(' ') + '.';
-    } else {
-      break;
-    }
-    fullText = paragraphs.join('\n\n');
-    currentWords = countWords(fullText);
-  }
-
-  return { text: fullText, words: currentWords };
+  return { text: fullText, words: currentWords, belowTarget: currentWords < WORD_TARGET_MIN };
 }
 
 export class SlackChannelRouter {
@@ -332,7 +310,7 @@ export class SlackChannelRouter {
             elements: [
               {
                 type: 'mrkdwn',
-                text: '🛡️ *Algorithm Reach Protection:* Social algorithms cut reach by 40-60% on posts with external links. *Do not put this link in your post body.* Post your narrative link-free and drop this link in the very *first comment*!',
+                text: '🛡️ *Link placement:* Links in the post body are widely reported to reduce reach. *Do not put this link in your post body.* Post your narrative link-free and drop this link in the very *first comment*!',
               },
             ],
           },
@@ -946,13 +924,13 @@ export class SlackChannelRouter {
   }
 
   /**
-   * Formats a harvested technical quote into an authentic, link-free 150-200 word post draft.
+   * Formats a harvested technical quote into an authentic, link-free post draft (at most 300 words).
    */
   public formatHarvestedDraft(comment: any, memberSlug: string, discussionUrl: string): HarvestedDraft {
     const rawQuote = comment?.text || '';
     const authorId = comment?.user || 'member';
 
-    const { text: postBody, words: wordCount } = synthesizeHarvestedPostBody(rawQuote);
+    const { text: postBody, words: wordCount, belowTarget } = synthesizeHarvestedPostBody(rawQuote);
     const personalShortlink = this.generatePersonalShortlink(memberSlug, discussionUrl);
     const firstComment = `Link to the original engineering discussion: ${personalShortlink}`;
 
@@ -964,6 +942,7 @@ export class SlackChannelRouter {
       postBody,
       firstComment,
       wordCount,
+      belowTarget,
     };
   }
 
@@ -1064,7 +1043,7 @@ export class SlackChannelRouter {
             type: 'section',
             text: {
               type: 'mrkdwn',
-              text: `*Proposed Post Draft (Link-Free, ${draft.wordCount} Words):*\n\n${draft.postBody}`,
+              text: `*Proposed Post Draft (Link-Free, ${draft.wordCount} Words${draft.belowTarget ? ', short and specific' : ''}):*\n\n${draft.postBody}${draft.belowTarget ? '\n\n_Under the 150-word target on purpose: add your own detail rather than filler._' : ''}`,
             },
           },
           {
@@ -1079,7 +1058,7 @@ export class SlackChannelRouter {
             elements: [
               {
                 type: 'mrkdwn',
-                text: '🛡️ *Algorithm Reach Protection:* Social algorithms cut reach by 40-60% on posts with external URLs. Post this narrative link-free and drop the link in your first comment.',
+                text: '🛡️ *Link placement:* Links in the post body are widely reported to reduce reach. Post this narrative link-free and drop the link in your first comment.',
               },
             ],
           },
@@ -1199,7 +1178,7 @@ export class SlackChannelRouter {
         type: 'section',
         text: {
           type: 'mrkdwn',
-          text: `*Proposed Post Draft (Link-Free, ${draft.wordCount} Words):*\n\n${draft.postBody}`,
+          text: `*Proposed Post Draft (Link-Free, ${draft.wordCount} Words${draft.belowTarget ? ', short and specific' : ''}):*\n\n${draft.postBody}${draft.belowTarget ? '\n\n_Under the 150-word target on purpose: add your own detail rather than filler._' : ''}`,
         },
       },
       {
@@ -1214,7 +1193,7 @@ export class SlackChannelRouter {
         elements: [
           {
             type: 'mrkdwn',
-            text: '🛡️ *Algorithm Reach Protection:* Social algorithms cut reach by 40-60% on posts with external URLs. Keep the post body link-free and drop the link in your first comment.',
+            text: '🛡️ *Link placement:* Links in the post body are widely reported to reduce reach. Keep the post body link-free and drop the link in your first comment.',
           },
         ],
       },

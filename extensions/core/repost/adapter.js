@@ -4,6 +4,8 @@
  * Zero external dependencies.
  */
 
+import { trimToCeiling } from '../../shared/word-budget.js';
+
 export const ROLE_DIRECTIVES = {
   gtm: {
     hook: "The technical trade-off that fundamentally changes how our enterprise customers operate:",
@@ -44,10 +46,10 @@ export const ROLE_DIRECTIVES = {
 };
 
 /**
- * Deterministically bounds and formats an adapted post body to 150-200 words.
+ * Deterministically formats an adapted post body, capped at 300 words (150 is a soft target; drafts are never padded).
  * @param {string} rawBody
  * @param {string} role - 'gtm' | 'talent' | 'product'
- * @returns {string} Clean 150-200 word post body without links.
+ * @returns {string} Clean post body without links, at most 300 words.
  */
 export function boundAdaptedBody(rawBody, role = 'gtm') {
   let cleaned = (rawBody || '').replace(/https?:\/\/[^\s)]+/gi, '').replace(/\s{2,}/g, ' ').trim();
@@ -60,30 +62,7 @@ export function boundAdaptedBody(rawBody, role = 'gtm') {
     directive.closing
   ];
 
-  let fullText = paragraphs.join('\n\n');
-  let currentWords = fullText.split(/\s+/).filter(Boolean).length;
-
-  let expIdx = 0;
-  while (currentWords < 150 && expIdx < directive.expansion.length) {
-    paragraphs.splice(paragraphs.length - 1, 0, directive.expansion[expIdx]);
-    fullText = paragraphs.join('\n\n');
-    currentWords = fullText.split(/\s+/).filter(Boolean).length;
-    expIdx++;
-  }
-
-  // Trim if over 200 words
-  while (currentWords > 200 && paragraphs.length > 2) {
-    paragraphs.splice(1, 1);
-    fullText = paragraphs.join('\n\n');
-    currentWords = fullText.split(/\s+/).filter(Boolean).length;
-  }
-
-  const words = fullText.split(/\s+/).filter(Boolean);
-  if (words.length > 200) {
-    fullText = words.slice(0, 195).join(' ') + '.';
-  }
-
-  return fullText;
+  return trimToCeiling(paragraphs.join('\n\n'));
 }
 
 /**

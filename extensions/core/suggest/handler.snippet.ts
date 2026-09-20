@@ -32,8 +32,8 @@ export function registerSuggestHandler(app: App, edgeBaseUrl: string): void {
     }
 
     const topItem = topRanked[0];
-    // Dispatch to Tier 2 Workhorse model for clean 150-200 word perspective drafting
-    const prompt = `Convert this high-signal technical insight into an authentic 150-200 word post draft for an engineering audience. No buzzwords, no emojis, no links in post body:\n\n"${topItem.text}"`;
+    // Dispatch to Tier 2 Workhorse model for perspective drafting (150 words is a soft target, 300 the ceiling)
+    const prompt = `Convert this high-signal technical insight into an authentic post draft for an engineering audience. Aim for 150 to 300 words and do not pad with generic filler; a shorter, specific draft is better. Use only facts present in the insight below. No buzzwords, no emojis, no links in post body:\n\n"${topItem.text}"`;
     const draftRes = await executeSemanticTask('workhorse', prompt);
     const postBody = draftRes.text.trim();
 

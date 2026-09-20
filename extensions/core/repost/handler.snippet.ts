@@ -25,7 +25,7 @@ export function registerRepostHandler(app: App, edgeBaseUrl: string): void {
     const cleanInput = text.replace(/--role\s+[a-z]+/gi, '').trim();
 
     // Call Tier 2 Workhorse model for role perspective adaptation
-    const prompt = `Adapt the following technical post into the "${targetRole}" perspective. Ensure tone is authentic and grounded. Bounded strictly to 150-200 words. No buzzwords, no emojis, no links:\n\n"${cleanInput}"`;
+    const prompt = `Adapt the following technical post into the "${targetRole}" perspective. Ensure tone is authentic and grounded. Aim for 150 to 300 words and do not pad with generic filler; use only facts present in the post. No buzzwords, no emojis, no links:\n\n"${cleanInput}"`;
     const adaptedRes = await executeSemanticTask('workhorse', prompt);
     const postBody = boundAdaptedBody(adaptedRes.text, targetRole);
     const firstComment = formatDualAttribution('engineer', `${edgeBaseUrl}/e/${command.user_name}?role=${targetRole}`, targetRole);

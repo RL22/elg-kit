@@ -25,7 +25,7 @@
     },
     "memoBody": {
       "type": "string",
-      "description": "Clean executive summary bounded strictly to 150-200 words, zero links"
+      "description": "Clean executive summary capped at 300 words (150 is a soft target), zero links"
     },
     "firstComment": {
       "type": "string",
@@ -33,8 +33,8 @@
     },
     "wordCount": {
       "type": "integer",
-      "minimum": 150,
-      "maximum": 200
+      "minimum": 1,
+      "maximum": 300
     }
   },
   "additionalProperties": false

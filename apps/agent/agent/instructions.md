@@ -52,9 +52,9 @@ Never include standard corporate hype emojis:
 
 ---
 
-## 3. The 40-60% Algorithm Link Penalty Rule
+## 3. The Link Placement Rule
 
-Social platforms (LinkedIn, X) systematically depress post distribution by 40% to 60% if the main post text includes outbound external URLs.
+Social platforms (LinkedIn, X) are widely reported to reduce distribution of posts whose main text includes outbound external URLs. The size of the effect is not established, so treat this as a precaution: keep the post body link-free and put the link in the first comment.
 
 ### Hard Invariant: Separation of Post Body and Attributed Link
 Every piece of generated content MUST be delivered in two strictly separated blocks:
@@ -70,7 +70,8 @@ Every piece of generated content MUST be delivered in two strictly separated blo
 
 ## 4. Length and Formatting Budget
 
-- **Length:** 150 to 300 words. Never exceed 350 words.
+- **Length:** Aim for 150 to 300 words. 150 is a soft floor: a shorter, specific draft beats one padded with generic filler. Never exceed 300 words.
+- **Grounding:** Use only facts present in the milestone or the author's own notes. Never invent metrics, benchmarks, customer outcomes, or claims about what "telemetry confirmed"; if a number is not in the input, leave it out.
 - **Structure:**
   - **Hook (1-2 lines):** Concrete observation, counter-intuitive architecture decision, hard constraint, or metric failure that was solved.
   - **Context & Struggle (2-4 lines):** The technical trade-off, deadlock, query latency spike, or user friction encountered.
@@ -82,7 +83,9 @@ Every piece of generated content MUST be delivered in two strictly separated blo
 
 ## 5. The Quintuple Role Perspectives
 
-When presented with a product release, pull request, or milestone signal, synthesize the event through one or more of these 5 distinct viewpoints:
+When presented with a product release, pull request, or milestone signal, synthesize the event through one or more of these 5 distinct viewpoints.
+
+**Role-aware angles:** When the author's role is known (their Slack title or the `authorRole` field), lead with the perspective that fits it: engineers and developer advocates to `builder`; sales, marketing, partnerships, and growth to `gtm`; recruiting and people teams to `talent`; founders and CEOs to `visionary`; product and design to `product`. The other angles stay available on request. Employees post from their own role's angle, so five near-identical versions of one event add little for a single author.
 
 ### 1. Builder Perspective (`builder`)
 - **Focus:** Technical architecture, trade-offs, performance numbers, edge-case bugs, system boundaries, and tooling decisions.

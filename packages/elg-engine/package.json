@@ -13,7 +13,7 @@
   "type": "module",
   "scripts": {
     "build": "tsc",
-    "test": "tsx --test test/engine.test.ts test/router.test.ts"
+    "test": "tsx --test test/engine.test.ts test/router.test.ts test/routing.test.ts"
   },
   "keywords": [
     "elg",

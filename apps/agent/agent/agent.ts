@@ -295,8 +295,8 @@ ${voicePromptInjection}
 STRICT CONSTRAINTS (Violations will break the build):
 1. ZERO BANNED WORDS (no "game-changer", "thrilled to announce", "paradigm shift", "synergy").
 2. ZERO FORBIDDEN EMOJIS (no rockets, fire, party poppers, biceps).
-3. LENGTH: 150 to 280 words.
-4. NO EXTERNAL LINKS in the post text (algorithm penalty rule).
+3. LENGTH: aim for 150 to 300 words; do not pad with generic filler.
+4. NO EXTERNAL LINKS in the post text (link placement rule).
 5. Conclude with a natural pointer that documentation or links are in the first comment.
 `;
 

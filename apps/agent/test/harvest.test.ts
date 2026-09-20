@@ -88,7 +88,7 @@ test('Thread Quote Harvesting & Reaction Handling Test Suite', async (t) => {
     assert.strictEqual(extractedUrls.length, 2);
   });
 
-  await t.test('synthesizeHarvestedPostBody: strictly guarantees 150-200 words and link-free body', () => {
+  await t.test('synthesizeHarvestedPostBody: stays under the 300-word ceiling, never pads, and is link-free', () => {
     const sampleInsights = [
       'We replaced centralized Redis locks with distributed CRDTs at the edge. Under 250k rps, P99 latency dropped from 1.4s to 4ms, eliminating cross-region lock contention.',
       'Discovered that connection pool exhaustion during database failover was caused by missing jitter on reconnects. Refactored retry policies with decorrelated exponential backoff, cutting latency spikes by 95%.',
@@ -100,8 +100,14 @@ test('Thread Quote Harvesting & Reaction Handling Test Suite', async (t) => {
     for (const insight of sampleInsights) {
       const result = synthesizeHarvestedPostBody(insight);
       assert.ok(
-        result.words >= 150 && result.words <= 200,
-        `Word count ${result.words} must be between 150 and 200 words`
+        result.words > 0 && result.words <= 300,
+        `Word count ${result.words} must be at most 300 words`
+      );
+      assert.strictEqual(result.belowTarget, result.words < 150);
+      assert.strictEqual(
+        result.text.includes('Observability telemetry confirmed that eliminating shared lock contention'),
+        false,
+        'Short drafts must not be padded with canned filler'
       );
       assert.strictEqual(
         /https?:\/\//i.test(result.text),
